@@ -2,7 +2,7 @@ name: Build Soporte Remoto SRL
 
 on:
   push:
-    branches: [srl-1.4.6]
+    branches: [main]
     tags: ['v*']
   workflow_dispatch:
 
