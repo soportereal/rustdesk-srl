@@ -32,6 +32,11 @@ jobs:
       - name: Install bridge codegen
         run: cargo install flutter_rust_bridge_codegen --version ${{ env.FLUTTER_RUST_BRIDGE_VERSION }} --features "uuid" --locked
 
+      - name: Flutter pub get
+        run: |
+          cd $GITHUB_WORKSPACE/flutter
+          flutter pub get
+
       - name: Generate bridge
         run: |
           cd $GITHUB_WORKSPACE
