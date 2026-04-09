@@ -1,0 +1,145 @@
+name: Build Soporte Remoto SRL
+
+on:
+  push:
+    branches: [srl-1.4.6]
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: "3.24.5"
+  FLUTTER_RUST_BRIDGE_VERSION: "1.80.0"
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+
+jobs:
+  generate-bridge:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+
+      - name: Install bridge codegen
+        run: cargo install flutter_rust_bridge_codegen --version ${{ env.FLUTTER_RUST_BRIDGE_VERSION }} --features "uuid" --locked
+
+      - name: Generate bridge
+        run: |
+          cd $GITHUB_WORKSPACE
+          ~/.cargo/bin/flutter_rust_bridge_codegen --rust-input ./src/flutter_ffi.rs --dart-output ./flutter/lib/generated_bridge.dart
+
+      - name: Upload bridge
+        uses: actions/upload-artifact@v4
+        with:
+          name: bridge-files
+          path: |
+            ./src/bridge_generated.rs
+            ./src/bridge_generated.io.rs
+            ./flutter/lib/generated_bridge.dart
+            ./flutter/lib/generated_bridge.freezed.dart
+
+  build-linux:
+    needs: generate-bridge
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Export GitHub Actions cache
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Restore bridge
+        uses: actions/download-artifact@v4
+        with:
+          name: bridge-files
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y clang cmake curl g++ gcc git libayatana-appindicator3-dev libclang-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk-3-dev libpam0g-dev libpulse-dev libva-dev libvdpau-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxdo-dev libxfixes-dev nasm ninja-build pkg-config
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+
+      - name: Install vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: 120deac3062162151622ca4860575a33844ba10b
+
+      - name: Build
+        run: python3 build.py --flutter --hwcodec
+
+      - name: Upload Linux deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: SoporteRemoto-SRL-linux-x86_64.deb
+          path: ./rustdesk-*.deb
+
+  build-windows:
+    needs: generate-bridge
+    runs-on: windows-2022
+    steps:
+      - name: Export GitHub Actions cache
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Restore bridge
+        uses: actions/download-artifact@v4
+        with:
+          name: bridge-files
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+
+      - name: Install vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: 120deac3062162151622ca4860575a33844ba10b
+
+      - name: Build
+        shell: bash
+        run: python3 build.py --flutter --hwcodec
+
+      - name: Upload Windows exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: SoporteRemoto-SRL-windows-x86_64
+          path: |
+            ./flutter/build/windows/x64/runner/Release/**/*
