@@ -182,7 +182,10 @@ jobs:
         shell: bash
         run: |
           cd res/msi
-          python preprocess.py --arp -d ../../rustdesk --app-name "Soporte Remoto SRL"
+          # Pasar -v explicito porque preprocess.py corre el binario para
+          # detectar version y los espacios en "Soporte Remoto SRL.exe"
+          # rompen subprocess.Popen con shell=True.
+          python preprocess.py --arp -d ../../rustdesk --app-name "Soporte Remoto SRL" -v 1.4.6
 
       - name: Build MSI
         shell: pwsh
