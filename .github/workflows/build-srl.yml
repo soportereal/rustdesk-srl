@@ -182,9 +182,16 @@ jobs:
         shell: bash
         run: |
           cd res/msi
-          # Pasar -v explicito porque preprocess.py corre el binario para
-          # detectar version y los espacios en "Soporte Remoto SRL.exe"
-          # rompen subprocess.Popen con shell=True.
+          # preprocess.py llama al binario para --version y --build-date con
+          # subprocess.Popen(f"{dist_app} {args}", shell=True). Los espacios en
+          # "Soporte Remoto SRL.exe" rompen el shell. Patch: quotear dist_app.
+          python -c "
+          import re
+          src = open('preprocess.py').read()
+          src = src.replace('f\"{dist_app} {args}\"', 'f\"\\\\\"{dist_app}\\\\\" {args}\"')
+          open('preprocess.py','w').write(src)
+          "
+          grep "dist_app" preprocess.py | head -3
           python preprocess.py --arp -d ../../rustdesk --app-name "Soporte Remoto SRL" -v 1.4.6
 
       - name: Build MSI
