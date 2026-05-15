@@ -167,17 +167,22 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Stage MSI files
+      - name: Stage MSI files (renombrar binario a Soporte Remoto SRL.exe)
         shell: bash
         run: |
           mkdir -p rustdesk
           cp -r flutter/build/windows/x64/runner/Release/* rustdesk/
+          # Renombrar el binario para que coincida con APP_NAME del codigo
+          # (config.rs APP_NAME = "Soporte Remoto SRL"). Asi el MSI instala
+          # con el nombre correcto y el binario no pide re-instalarse.
+          mv "rustdesk/rustdesk.exe" "rustdesk/Soporte Remoto SRL.exe"
+          ls -la "rustdesk/Soporte Remoto SRL.exe"
 
       - name: Preprocess MSI (WiX wxs files)
         shell: bash
         run: |
           cd res/msi
-          python preprocess.py --arp -d ../../rustdesk
+          python preprocess.py --arp -d ../../rustdesk --app-name "Soporte Remoto SRL"
 
       - name: Build MSI
         shell: pwsh
