@@ -148,3 +148,38 @@ jobs:
           name: SoporteRemoto-SRL-windows-x86_64
           path: |
             ./flutter/build/windows/x64/runner/Release/**/*
+
+      # ---- MSI installer (WiX) ----
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Stage MSI files
+        shell: bash
+        run: |
+          mkdir -p rustdesk
+          cp -r flutter/build/windows/x64/runner/Release/* rustdesk/
+
+      - name: Preprocess MSI (WiX wxs files)
+        shell: bash
+        run: |
+          cd res/msi
+          python preprocess.py --arp -d ../../rustdesk
+
+      - name: Build MSI
+        shell: pwsh
+        run: |
+          cd res/msi
+          nuget restore msi.sln
+          msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Windows10
+
+      - name: Rename MSI
+        shell: bash
+        run: |
+          mv res/msi/Package/bin/x64/Release/en-us/Package.msi ./SoporteRemoto-SRL-1.4.6-x86_64.msi
+          ls -la SoporteRemoto-SRL-*.msi
+
+      - name: Upload MSI
+        uses: actions/upload-artifact@v4
+        with:
+          name: SoporteRemoto-SRL-windows-installer
+          path: ./SoporteRemoto-SRL-*.msi
