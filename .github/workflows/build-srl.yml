@@ -92,6 +92,13 @@ jobs:
         with:
           vcpkgGitCommitId: 120deac3062162151622ca4860575a33844ba10b
 
+      - name: Install vcpkg dependencies (manifest mode)
+        shell: bash
+        env:
+          VCPKG_DEFAULT_HOST_TRIPLET: x64-linux
+        run: |
+          $VCPKG_ROOT/vcpkg install --triplet x64-linux --x-install-root="$VCPKG_ROOT/installed"
+
       - name: Build
         run: python3 build.py --flutter
 
@@ -137,6 +144,13 @@ jobs:
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgGitCommitId: 120deac3062162151622ca4860575a33844ba10b
+
+      - name: Install vcpkg dependencies (manifest mode)
+        shell: bash
+        env:
+          VCPKG_DEFAULT_HOST_TRIPLET: x64-windows-static
+        run: |
+          $VCPKG_ROOT/vcpkg install --triplet x64-windows-static --x-install-root="$VCPKG_ROOT/installed"
 
       - name: Build
         shell: bash
