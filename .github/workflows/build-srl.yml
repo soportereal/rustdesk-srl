@@ -13,7 +13,7 @@ env:
 
 jobs:
   generate-bridge:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,7 +54,7 @@ jobs:
 
   build-linux:
     needs: generate-bridge
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Export GitHub Actions cache
         uses: actions/github-script@v6
@@ -93,7 +93,7 @@ jobs:
           vcpkgGitCommitId: 120deac3062162151622ca4860575a33844ba10b
 
       - name: Build
-        run: python3 build.py --flutter --hwcodec
+        run: python3 build.py --flutter
 
       - name: Upload Linux deb
         uses: actions/upload-artifact@v4
@@ -140,7 +140,7 @@ jobs:
 
       - name: Build
         shell: bash
-        run: python3 build.py --flutter --hwcodec
+        run: python3 build.py --flutter
 
       - name: Upload Windows exe
         uses: actions/upload-artifact@v4
