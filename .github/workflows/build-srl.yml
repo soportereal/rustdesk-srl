@@ -1,4 +1,4 @@
-name: Build Soporte Remoto SRL
+name: Build Soporte Remoto Factupos
 
 on:
   push:
@@ -105,7 +105,7 @@ jobs:
       - name: Upload Linux deb
         uses: actions/upload-artifact@v4
         with:
-          name: SoporteRemoto-SRL-linux-x86_64.deb
+          name: SoporteRemoto-Factupos-linux-x86_64.deb
           path: ./rustdesk-*.deb
 
   build-windows:
@@ -159,7 +159,7 @@ jobs:
       - name: Upload Windows exe
         uses: actions/upload-artifact@v4
         with:
-          name: SoporteRemoto-SRL-windows-x86_64
+          name: SoporteRemoto-Factupos-windows-x86_64
           path: |
             ./flutter/build/windows/x64/runner/Release/**/*
 
@@ -167,16 +167,16 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Stage MSI files (renombrar binario a Soporte Remoto SRL.exe)
+      - name: Stage MSI files (renombrar binario a Soporte Remoto Factupos.exe)
         shell: bash
         run: |
           mkdir -p rustdesk
           cp -r flutter/build/windows/x64/runner/Release/* rustdesk/
           # Renombrar el binario para que coincida con APP_NAME del codigo
-          # (config.rs APP_NAME = "Soporte Remoto SRL"). Asi el MSI instala
+          # (config.rs APP_NAME = "Soporte Remoto Factupos"). Asi el MSI instala
           # con el nombre correcto y el binario no pide re-instalarse.
-          mv "rustdesk/rustdesk.exe" "rustdesk/Soporte Remoto SRL.exe"
-          ls -la "rustdesk/Soporte Remoto SRL.exe"
+          mv "rustdesk/rustdesk.exe" "rustdesk/Soporte Remoto Factupos.exe"
+          ls -la "rustdesk/Soporte Remoto Factupos.exe"
 
       - name: Preprocess MSI (WiX wxs files)
         shell: bash
@@ -184,7 +184,7 @@ jobs:
           cd res/msi
           # preprocess.py llama al binario para --version y --build-date con
           # subprocess.Popen(f"{dist_app} {args}", shell=True). Los espacios en
-          # "Soporte Remoto SRL.exe" rompen el shell. Patch: quotear dist_app.
+          # "Soporte Remoto Factupos.exe" rompen el shell. Patch: quotear dist_app.
           python -c "
           import re
           src = open('preprocess.py').read()
@@ -192,7 +192,7 @@ jobs:
           open('preprocess.py','w').write(src)
           "
           grep "dist_app" preprocess.py | head -3
-          python preprocess.py --arp -d ../../rustdesk --app-name "Soporte Remoto SRL" -v 1.4.6
+          python preprocess.py --arp -d ../../rustdesk --app-name "Soporte Remoto Factupos" -v 1.4.6
 
       - name: Build MSI
         shell: pwsh
@@ -204,11 +204,11 @@ jobs:
       - name: Rename MSI
         shell: bash
         run: |
-          mv res/msi/Package/bin/x64/Release/en-us/Package.msi ./SoporteRemoto-SRL-1.4.6-x86_64.msi
-          ls -la SoporteRemoto-SRL-*.msi
+          mv res/msi/Package/bin/x64/Release/en-us/Package.msi ./SoporteRemoto-Factupos-1.4.6-x86_64.msi
+          ls -la SoporteRemoto-Factupos-*.msi
 
       - name: Upload MSI
         uses: actions/upload-artifact@v4
         with:
-          name: SoporteRemoto-SRL-windows-installer
-          path: ./SoporteRemoto-SRL-*.msi
+          name: SoporteRemoto-Factupos-windows-installer
+          path: ./SoporteRemoto-Factupos-*.msi
