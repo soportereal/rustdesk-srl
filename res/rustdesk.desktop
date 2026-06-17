@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=Soporte Remoto SRL
+Name=Soporte Remoto Factupos
 GenericName=Remote Desktop
-Comment=Soporte Remoto SRL
+Comment=Soporte Remoto Factupos
 Exec=rustdesk %u
 Icon=rustdesk
 Terminal=false
