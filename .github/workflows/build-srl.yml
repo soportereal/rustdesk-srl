@@ -1,9 +1,8 @@
 name: Build Soporte Remoto Factupos
 
+# 18-oct-2026 (#2942): ya NO corre solo con cada push. Las versiones nuevas se compilan con
+# actualizar-srl.yml (RustDesk oficial + srl-marca/aplicar.sh). Este queda a mano, por si acaso.
 on:
-  push:
-    branches: [main]
-    tags: ['v*']
   workflow_dispatch:
 
 env:
