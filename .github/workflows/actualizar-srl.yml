@@ -151,6 +151,9 @@ jobs:
       - name: Dependencias
         run: |
           sudo apt-get update -y
+          # 🪤 la imagen ubuntu-22.04 de GitHub trae libunwind-14-dev, que choca con el libunwind-dev
+          #    que pide libgstreamer1.0-dev («held broken packages»): se quita antes.
+          sudo apt-get remove -y libunwind-14-dev || true
           sudo apt-get install -y clang cmake curl g++ gcc git libasound2-dev libayatana-appindicator3-dev libclang-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk-3-dev libpam0g-dev libpulse-dev libssl-dev libva-dev libvdpau-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxdo-dev libxfixes-dev nasm ninja-build pkg-config
 
       - uses: dtolnay/rust-toolchain@stable
