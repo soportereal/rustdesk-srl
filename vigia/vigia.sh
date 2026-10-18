@@ -43,9 +43,13 @@ publicar() {
     [ "$(dpkg-deb -f "$DEB" Package)" = rustdesk ] || fallo "el .deb no es el paquete rustdesk"
     [ "$(dpkg-deb -f "$DEB" Version)" = "$VER" ] || fallo "el .deb no es la versión $VER"
     mkdir "$T/x" && dpkg-deb -x "$DEB" "$T/x"
-    strings "$T/x/usr/share/rustdesk/lib/librustdesk.so" | grep -q "remote.factupos.com" || fallo "el .deb no trae nuestro servidor"
-    strings "$T/x/usr/share/rustdesk/lib/librustdesk.so" | grep -q "Ka3nu6yPqf05OpwXeaMx6DqA7JKAXKl5oC58TKyf1WI=" || fallo "el .deb no trae la llave del servidor"
-    strings "$T/x/usr/share/rustdesk/lib/librustdesk.so" | grep -q "Soporte Remoto Factupos" || fallo "el .deb no trae el nombre (cambiaría el ID de las PCs)"
+    # 🪤 NO «strings … | grep -q» con pipefail: grep -q corta al encontrar, strings muere con SIGPIPE
+    #    y el tubo da 141 → decía «no trae el servidor» justo cuando SÍ lo traía (18-oct, 1.5.0).
+    strings "$T/x/usr/share/rustdesk/lib/librustdesk.so" > "$T/textos.txt" || fallo "no se pudo leer librustdesk.so"
+    grep -qF "remote.factupos.com" "$T/textos.txt" || fallo "el .deb no trae nuestro servidor"
+    grep -qF "Ka3nu6yPqf05OpwXeaMx6DqA7JKAXKl5oC58TKyf1WI=" "$T/textos.txt" || fallo "el .deb no trae la llave del servidor"
+    grep -qF "Soporte Remoto Factupos" "$T/textos.txt" || fallo "el .deb no trae el nombre (cambiaría el ID de las PCs)"
+    ! grep -qF "rs-ny.rustdesk.com" "$T/textos.txt" || fallo "el .deb todavía apunta al servidor de RustDesk"
 
     # --- respaldo de lo publicado ahora (para volver atrás) ---
     ANT=$(version_de "$MAN_LINUX")
