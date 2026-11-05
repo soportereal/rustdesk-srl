@@ -185,7 +185,9 @@ jobs:
 
       - name: Compilar
         working-directory: code
-        run: python3 build.py --flutter
+        # --unix-file-copy-paste: copiar/pegar ARCHIVOS desde Linux (igual que la oficial). Sin él,
+        # desde una PC Linux no se pueden pegar archivos en la PC controlada (#3452).
+        run: python3 build.py --flutter --unix-file-copy-paste
 
       - name: Comprobar el paquete
         working-directory: code
@@ -198,6 +200,8 @@ jobs:
           strings x/usr/share/rustdesk/lib/librustdesk.so | grep -q remote.factupos.com || { echo "❌ sin el servidor"; exit 1; }
           strings x/usr/share/rustdesk/lib/librustdesk.so | grep -q "Soporte Remoto Factupos" || { echo "❌ sin el nombre"; exit 1; }
           grep -q "^Name=Soporte Remoto Factupos$" x/usr/share/applications/rustdesk.desktop || { echo "❌ lanzador"; exit 1; }
+          strings x/usr/share/rustdesk/lib/librustdesk.so > textos.txt
+          grep -qF "libs/clipboard/src/platform/unix/fuse/mod.rs" textos.txt || { echo "❌ sin copiar/pegar archivos (unix-file-copy-paste)"; exit 1; }
           mv "$DEB" "../SoporteRemoto-Factupos-${V}-x86_64.deb"
           echo "✅ SoporteRemoto-Factupos-${V}-x86_64.deb"
 

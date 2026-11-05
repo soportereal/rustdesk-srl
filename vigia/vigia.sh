@@ -50,6 +50,7 @@ publicar() {
     grep -qF "Ka3nu6yPqf05OpwXeaMx6DqA7JKAXKl5oC58TKyf1WI=" "$T/textos.txt" || fallo "el .deb no trae la llave del servidor"
     grep -qF "Soporte Remoto Factupos" "$T/textos.txt" || fallo "el .deb no trae el nombre (cambiaría el ID de las PCs)"
     ! grep -qF "rs-ny.rustdesk.com" "$T/textos.txt" || fallo "el .deb todavía apunta al servidor de RustDesk"
+    grep -qF "libs/clipboard/src/platform/unix/fuse/mod.rs" "$T/textos.txt" || fallo "el .deb no trae copiar/pegar archivos (unix-file-copy-paste, #3452)"
 
     # --- respaldo de lo publicado ahora (para volver atrás) ---
     ANT=$(version_de "$MAN_LINUX")
